@@ -1,5 +1,6 @@
 .DS_Store
 .idea
+__pycache__
 */__pycache__
 img
 result_seq2seq.csv
