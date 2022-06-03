@@ -1,0 +1,5 @@
+.DS_Store
+.idea
+*/__pycache__
+img
+result_seq2seq.csv
