@@ -3,4 +3,5 @@
 __pycache__
 */__pycache__
 img
+checkpoint
 result_seq2seq.csv

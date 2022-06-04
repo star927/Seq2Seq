@@ -1,47 +1,7 @@
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
-
-
-class StandardScaler:
-    """将数据进行标准化和恢复成真实数据"""
-    def __init__(self):
-        self.x_mean = 0.0
-        self.x_std = 1.0
-
-    def fit_x(self, data):
-        self.x_mean = data.mean(0)
-        self.x_std = data.std(0)
-
-    def fit_y(self, data):
-        self.y_mean = data.mean(0)
-        self.y_std = data.std(0)
-
-    def transform_x(self, data):
-        """数据标准化"""
-        return (data - self.x_mean) / self.x_std
-
-    def transform_y(self, data):
-        """数据标准化"""
-        return (data - self.y_mean) / self.y_std
-
-    def inverse_transform_y(self, data):
-        """将数据恢复成真实数据"""
-        return (data * self.y_std) + self.y_mean
-
-    def transform_time(self, data):
-        """时间放缩在[-0.5,0.5]区间"""
-        data[:, 0] = (data[:, 0] - 1) / 11.0 - 0.5  # Month
-        data[:, 1] = (data[:, 1] - 1) / 30.0 - 0.5  # Day
-        data[:, 2] = data[:, 2] / 23.0 - 0.5  # Hour
-        return data
-
-    def inverse_transform_time(self, data):
-        """将时间恢复成真实时间"""
-        data[:, 0] = (data[:, 0] + 0.5) * 11 + 1  # Month
-        data[:, 1] = (data[:, 1] + 0.5) * 30 + 1  # Day
-        data[:, 2] = (data[:, 2] + 0.5) * 23  # Hour
-        return np.floor(data + 0.5).astype(int)  # 四舍五入转成int
+from tool import StandardScaler
 
 
 class Dataset_Weather(Dataset):

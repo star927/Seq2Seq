@@ -1,6 +1,7 @@
 import argparse
 import pandas as pd
 import torch
+import os
 from exp import Exp_Seq2Seq
 
 
@@ -32,8 +33,26 @@ if __name__ == "__main__":
     for i in range(args.exp_num):
         exp = Exp_Seq2Seq(args)
 
+        setting = "{}_ft{}_sl{}_pl{}_bs{}_nh{}_nl{}_do{}_lr{}_{}".format(
+            args.cell,
+            args.feature,
+            args.seq_len,
+            args.pred_len,
+            args.batch_size,
+            args.num_hidden,
+            args.num_layer,
+            args.dropout,
+            args.learning_rate,
+            i,
+        )
+
+        checkpoint_folder = "./checkpoint"
+        if not os.path.exists(checkpoint_folder):
+            os.mkdir(checkpoint_folder)
+        checkpoint_path = os.path.join(checkpoint_folder, f"{setting}.pth")  # checkpoint_path对应最小的验证集loss
+
         print(">>>>>>>start training : >>>>>>>>>>>>>>>>>>>>>>>>>>")
-        actual_train_epochs, train_cost_time = exp.train()
+        actual_train_epochs, train_cost_time = exp.train(checkpoint_path)
 
         print(">>>>>>>testing : <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         mse, mae = exp.test()
@@ -53,7 +72,6 @@ if __name__ == "__main__":
             pd.DataFrame([result]).to_csv(path_result, index=False)
 
         # 在测试集中随机选取6个样本进行预测，预测结果的图片存放在img文件夹下
-        args.predict = True
         if args.predict:
             exp.predict()
 

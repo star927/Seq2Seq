@@ -1,13 +1,15 @@
 import numpy as np
+import torch
 from torch import nn
 from torch import optim
 from torch.utils.data import DataLoader
+import os
 import time
-from data_loader import Dataset_Weather
-from model import EncoderDecoder
 import matplotlib
 from matplotlib.ticker import MaxNLocator
-import os
+from tool import EarlyStopping
+from data_loader import Dataset_Weather
+from model import EncoderDecoder
 
 matplotlib.use("agg")
 from matplotlib import pyplot as plt
@@ -54,18 +56,17 @@ class Exp_Seq2Seq:
         self.model.train()
         return total_loss
 
-    def train(self):
+    def train(self, checkpoint_path):
         train_data, train_loader = self._get_data(dataset_type="train")
         vali_data, vali_loader = self._get_data(dataset_type="vali")
         test_data, test_loader = self._get_data(dataset_type="test")
 
         time_start = time.time()
 
+        early_stopping = EarlyStopping()
         model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
         criterion = nn.HuberLoss()
 
-        min_vali_loss = 1e10
-        bad_train = 0
         total_iter_count = 0
         train_steps = len(train_loader)
         actual_train_epochs = self.args.max_train_epochs
@@ -104,18 +105,14 @@ class Exp_Seq2Seq:
                     epoch + 1, train_steps, train_loss, vali_loss, test_loss
                 )
             )
+            early_stopping(vali_loss, self.model, checkpoint_path)
+            if early_stopping.early_stop:
+                print("Early stopping")
+                actual_train_epochs = epoch + 1
+                break
 
-            # 每个epoch训练完，计算在验证集上的loss，记录迄今为止最小的loss，即变量min_vali_loss
-            # 如果当前验证集上的loss比min_vali_loss大，则bad_train加1，bad_train=3则停止训练
-            if vali_loss < min_vali_loss:
-                min_vali_loss = vali_loss
-                bad_train = 0
-            else:
-                bad_train += 1
-                if bad_train == 3:
-                    actual_train_epochs = epoch + 1
-                    break
-
+        # checkpoint_path对应最小的验证集loss
+        self.model.load_state_dict(torch.load(checkpoint_path))
         train_cost_time = time.time() - time_start
         print("Train, cost time: {}".format(train_cost_time))
         return actual_train_epochs, train_cost_time
