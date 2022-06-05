@@ -177,14 +177,14 @@ class Exp_Seq2Seq:
             plt.xticks(rotation=45)
             plt.gca().xaxis.set_major_locator(MaxNLocator(8))  # x轴最多画8个刻度
 
-        img_title = "{0} seq_len:{1} pred_len:{2} mae:{3:.6f}".format(
-            self.args.cell, self.args.seq_len, self.args.pred_len, mae
+        img_title = "{0} {1} seq_len:{2} pred_len:{3} mae:{4:.6f}".format(
+            self.args.cell, self.args.feature, self.args.seq_len, self.args.pred_len, mae
         )
         plt.suptitle(img_title)
         if not os.path.exists("./img"):
             os.mkdir("./img")
-        img_path = "./img/{0} seq_len({1}) pred_len({2}) mae({3:.6f}).png".format(
-            self.args.cell, self.args.seq_len, self.args.pred_len, mae
+        img_path = "./img/{0} {1} seq_len({2}) pred_len({3}) mae({4:.6f}).png".format(
+            self.args.cell, self.args.feature, self.args.seq_len, self.args.pred_len, mae
         )
         plt.tight_layout()
         plt.savefig(img_path)
